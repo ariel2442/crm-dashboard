@@ -3,8 +3,10 @@
  */
 import { COLORS } from "../../constants/colors.js";
 import { PAGE_META } from "../../data/navigation.js";
+import { useAuth } from "../../contexts/AuthContext.jsx";
 
-export default function Topbar({ page }) {
+export default function Topbar({ page, onMenuClick }) {
+  const { user, logout } = useAuth();
   const getColor = (colorKey) => COLORS[colorKey] || COLORS.text;
   const m = PAGE_META[page] || PAGE_META.overview;
   const mColor = getColor(m.colorKey);
@@ -28,6 +30,27 @@ export default function Topbar({ page }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <button
+          className="mobile-hamburger"
+          onClick={onMenuClick}
+          aria-label="תפריט"
+          style={{
+            display: "none",
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: "rgba(255,255,255,.05)",
+            border: `1px solid ${COLORS.border}`,
+            color: COLORS.text,
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 18,
+            cursor: "pointer",
+            marginLeft: 4,
+          }}
+        >
+          ☰
+        </button>
         <div
           style={{
             width: 40,
@@ -107,6 +130,39 @@ export default function Topbar({ page }) {
           </div>
         </div>
         <span style={{ fontSize: 12, color: COLORS.textMuted }}>{greet}</span>
+        {user && (
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                fontSize: 12,
+                color: COLORS.text,
+                fontWeight: 600,
+                maxWidth: 140,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {user.name || user.username}
+            </span>
+            <button
+              onClick={logout}
+              title="התנתק"
+              style={{
+                padding: "7px 12px",
+                borderRadius: 9,
+                background: "rgba(244,63,94,0.1)",
+                border: `1px solid ${COLORS.rose}40`,
+                color: COLORS.rose,
+                fontSize: 11,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              יציאה
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

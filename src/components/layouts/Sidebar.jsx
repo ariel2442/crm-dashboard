@@ -5,7 +5,7 @@ import { useState } from "react";
 import { COLORS } from "../../constants/colors.js";
 import { NAV_GROUPS } from "../../data/navigation.js";
 
-export default function Sidebar({ page, setPage }) {
+export default function Sidebar({ page, setPage, mobileOpen, closeMobile }) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
   const W = collapsed ? 68 : 224;
@@ -28,6 +28,7 @@ export default function Sidebar({ page, setPage }) {
 
   return (
     <aside
+      className={"sidebar" + (mobileOpen ? " open" : "")}
       style={{
         width: W,
         flexShrink: 0,

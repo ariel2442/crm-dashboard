@@ -43,9 +43,15 @@ export const NAV_GROUPS = [
         colorKey: "emerald",
         submenu: [
           {
+            id: "leads-real",
+            icon: "🎯",
+            label: "לידים (מערכת)",
+            colorKey: "emerald",
+          },
+          {
             id: "sales-leads",
             icon: "◎",
-            label: "כל הלידים",
+            label: "כל הלידים (דמו)",
             colorKey: "cyan",
           },
         ],
@@ -56,6 +62,14 @@ export const NAV_GROUPS = [
         label: "פרוייקטים",
         badge: null,
         colorKey: "amber",
+        submenu: [
+          {
+            id: "client-projects",
+            icon: "📁",
+            label: "פרויקטי לקוחות",
+            colorKey: "cyan",
+          },
+        ],
       },
       {
         id: "finance",
@@ -139,16 +153,28 @@ export const PAGE_META = {
     colorKey: "emerald",
   },
   "sales-leads": {
-    title: "כל הלידים",
+    title: "כל הלידים (דמו)",
     sub: "ניהול צינור לידים",
     icon: "◎",
     colorKey: "cyan",
+  },
+  "leads-real": {
+    title: "לידים",
+    sub: "ניהול לידים · סטטוסים · הצעות מחיר",
+    icon: "🎯",
+    colorKey: "emerald",
   },
   projects: {
     title: "פרוייקטים",
     sub: "ניהול · התקדמות · לוחות זמנים",
     icon: "🚀",
     colorKey: "amber",
+  },
+  "client-projects": {
+    title: "פרויקטי לקוחות",
+    sub: "נתונים אמיתיים · העלאת קבצים",
+    icon: "📁",
+    colorKey: "cyan",
   },
   finance: {
     title: "פיננסים",

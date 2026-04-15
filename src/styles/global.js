@@ -160,4 +160,77 @@ button {
     linear-gradient(90deg, ${COLORS.bgGrid} 1px, transparent 1px);
   background-size: 44px 44px;
 }
+
+/* ── Mobile / Responsive ── */
+.mobile-hamburger { display: none; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+
+  /* Show hamburger, hide default sidebar, allow overlay */
+  .mobile-hamburger { display: flex !important; }
+
+  .app-shell { height: auto !important; min-height: 100vh; }
+  .main-col { overflow: visible !important; }
+  .page-scroll { overflow: visible !important; height: auto !important; }
+
+  /* Sidebar becomes a slide-in drawer */
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    height: 100vh !important;
+    width: 260px !important;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.22,1,0.36,1) !important;
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-backdrop.open {
+    display: block !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(2px);
+    z-index: 49;
+  }
+
+  /* Force heavy multi-column grids to single / two columns */
+  [style*="repeat(4,1fr)"],
+  [style*="repeat(4, 1fr)"] {
+    grid-template-columns: repeat(2,1fr) !important;
+  }
+  [style*="repeat(3,1fr)"],
+  [style*="repeat(3, 1fr)"],
+  [style*="repeat(2,1fr)"],
+  [style*="repeat(2, 1fr)"],
+  [style*="2.2fr 1fr"],
+  [style*="1fr 1.1fr 1.1fr"],
+  [style*="1fr 1fr"],
+  [style*="2fr 1fr"],
+  [style*="1fr 2fr"],
+  [style*="1.5fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Reduce dashboard padding */
+  .fu[style*="padding: 24px"],
+  [style*="padding: 24px"] { padding: 14px !important; }
+
+  header[style*="padding: 18px 28px"] { padding: 14px 16px !important; }
+
+  h1 { font-size: 15px !important; }
+  h2 { font-size: 17px !important; }
+
+  /* Let tables / wide content scroll horizontally */
+  .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 560px) {
+  [style*="repeat(4,1fr)"],
+  [style*="repeat(4, 1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
 `;
