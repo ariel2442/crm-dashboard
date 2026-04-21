@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteRule ^$ dist/ [L]
+RewriteRule ^(?!dist/)(.*)$ dist/$1 [L]
