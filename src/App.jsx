@@ -1,6 +1,3 @@
-/**
- * Main App Component
- */
 import { useState } from "react";
 import { GLOBAL_CSS } from "./styles/global.js";
 import Sidebar from "./components/layouts/Sidebar.jsx";
@@ -18,42 +15,11 @@ import OrganicLeads from "./components/dashboards/OrganicLeads.jsx";
 import FinanceDetails from "./components/dashboards/FinanceDetails.jsx";
 import ClientProjects from "./components/dashboards/ClientProjects.jsx";
 import LeadsReal from "./components/dashboards/LeadsReal.jsx";
-import Login from "./components/auth/Login.jsx";
-import UsersManager from "./components/admin/UsersManager.jsx";
-import { useAuth } from "./contexts/AuthContext.jsx";
 import { COLORS } from "./constants/colors.js";
 
 export default function App() {
-  const { user, loading } = useAuth();
   const [page, setPage] = useState("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  if (loading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: COLORS.bg,
-          color: COLORS.textMuted,
-          fontSize: 14,
-        }}
-      >
-        טוען...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <>
-        <style>{GLOBAL_CSS}</style>
-        <Login />
-      </>
-    );
-  }
 
   const navigate = (id) => {
     setPage(id);
@@ -73,7 +39,6 @@ export default function App() {
     if (page === "finance-details") return <FinanceDetails />;
     if (page === "client-projects") return <ClientProjects />;
     if (page === "leads-real") return <LeadsReal />;
-    if (page === "users") return <UsersManager />;
     return <Placeholder page={page} />;
   };
 
