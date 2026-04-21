@@ -19,6 +19,7 @@ import FinanceDetails from "./components/dashboards/FinanceDetails.jsx";
 import ClientProjects from "./components/dashboards/ClientProjects.jsx";
 import LeadsReal from "./components/dashboards/LeadsReal.jsx";
 import Login from "./components/auth/Login.jsx";
+import UsersManager from "./components/admin/UsersManager.jsx";
 import { useAuth } from "./contexts/AuthContext.jsx";
 import { COLORS } from "./constants/colors.js";
 
@@ -72,6 +73,7 @@ export default function App() {
     if (page === "finance-details") return <FinanceDetails />;
     if (page === "client-projects") return <ClientProjects />;
     if (page === "leads-real") return <LeadsReal />;
+    if (page === "users") return <UsersManager />;
     return <Placeholder page={page} />;
   };
 

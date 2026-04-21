@@ -117,6 +117,13 @@ export const NAV_GROUPS = [
         badge: null,
         colorKey: "textMuted",
       },
+      {
+        id: "users",
+        icon: "👥",
+        label: "ניהול משתמשים",
+        badge: null,
+        colorKey: "cyan",
+      },
     ],
   },
 ];

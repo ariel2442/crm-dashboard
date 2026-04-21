@@ -1,57 +1,26 @@
-/**
- * AuthContext — holds the logged-in user and exposes login/logout.
- */
-import { createContext, useContext, useEffect, useState } from "react";
-import {
-  login as apiLogin,
-  validateToken,
-  fetchCurrentUser,
-  clearToken,
-  getToken,
-} from "../api/client.js";
+import { createContext, useContext, useState } from "react";
+import { login as authLogin, logout as authLogout, getSession } from "../api/auth.js";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => getSession());
 
-  useEffect(() => {
-    (async () => {
-      if (!getToken()) {
-        setLoading(false);
-        return;
-      }
-      const ok = await validateToken();
-      if (ok) {
-        try {
-          const me = await fetchCurrentUser();
-          setUser(me);
-        } catch {
-          clearToken();
-        }
-      }
-      setLoading(false);
-    })();
-  }, []);
-
-  const login = async (username, password) => {
-    await apiLogin(username, password);
-    const me = await fetchCurrentUser();
-    setUser(me);
-    return me;
+  const login = (username, password) => {
+    const session = authLogin(username, password);
+    setUser(session);
+    return session;
   };
 
   const logout = () => {
-    clearToken();
+    authLogout();
     setUser(null);
   };
 
   const isAdmin = user?.roles?.includes("administrator");
-  const isClient = user?.roles?.includes("client");
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAdmin, isClient }}>
+    <AuthContext.Provider value={{ user, loading: false, login, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
