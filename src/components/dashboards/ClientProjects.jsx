@@ -4,7 +4,6 @@
  */
 import { useEffect, useState } from "react";
 import { COLORS } from "../../constants/colors.js";
-import { useAuth } from "../../contexts/AuthContext.jsx";
 import {
   listProjects,
   createProject,
@@ -18,7 +17,7 @@ import SectionTitle from "../shared/SectionTitle.jsx";
 const STATUS_OPTIONS = ["חדש", "בתהליך", "ממתין ללקוח", "הושלם"];
 
 export default function ClientProjects() {
-  const { isAdmin, user } = useAuth();
+  const isAdmin = true;
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -192,7 +191,7 @@ export default function ClientProjects() {
             {selected ? (
               <ProjectDetail
                 project={selected}
-                canEdit={isAdmin || selected.authorId === user?.id}
+                canEdit={true}
                 canDelete={isAdmin}
                 onUpdated={onUpdated}
                 onDelete={() => onDelete(selected.id)}

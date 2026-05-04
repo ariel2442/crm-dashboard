@@ -1,8 +1,6 @@
 /**
- * QuoteModal — builds a quote for a lead, computes totals, saves to WP,
- * and opens a printable contract HTML in a new window.
- *
- * Stage 2 scope. Stage 3 adds Green API send, stage 4 adds iCount payment link.
+ * QuoteModal — builds a quote, saves to WP, sends via WhatsApp (Green API),
+ * creates GROW payment links, and shows tracking info.
  */
 import { useState, useMemo } from "react";
 import { COLORS } from "../../constants/colors.js";
@@ -12,6 +10,10 @@ import {
   DEFAULT_VAT_RATE,
 } from "../../api/quotes.js";
 import { openContractWindow } from "../../contracts/templates.js";
+import {
+  sendQuoteToClient,
+  createPaymentLink,
+} from "../../api/automations.js";
 
 const formatMoney = (n) =>
   new Intl.NumberFormat("he-IL", {
@@ -29,6 +31,10 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [savedQuote, setSavedQuote] = useState(null);
+  const [waSending, setWaSending] = useState(false);
+  const [waSent, setWaSent] = useState(false);
+  const [payBusy, setPayBusy] = useState(false);
+  const [paymentLink, setPaymentLink] = useState("");
 
   const totals = useMemo(
     () => computeTotals(items, vatRate),
@@ -61,6 +67,7 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
         title: `הצעה ל${lead.title}`,
         leadId: lead.id,
         clientName: lead.title,
+        clientPhone: lead.meta.phone || "",
         serviceType: lead.meta.service_type || "אחר",
         items,
         vatRate,
@@ -72,6 +79,40 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
       setErr(e.message || "שגיאה בשמירת ההצעה");
     } finally {
       setBusy(false);
+    }
+  };
+
+  const sendWhatsApp = async () => {
+    if (!savedQuote) return;
+    setWaSending(true);
+    setErr("");
+    try {
+      await sendQuoteToClient(savedQuote.id, lead.meta.phone || "");
+      setWaSent(true);
+    } catch (e) {
+      setErr(e.message || "שגיאה בשליחת WhatsApp");
+    } finally {
+      setWaSending(false);
+    }
+  };
+
+  const generatePaymentLink = async () => {
+    if (!savedQuote) return;
+    setPayBusy(true);
+    setErr("");
+    try {
+      const res = await createPaymentLink({
+        id: savedQuote.id,
+        clientName: lead.title,
+        clientPhone: lead.meta.phone || "",
+        total: totals.total,
+        proposalNum: String(savedQuote.id),
+      });
+      setPaymentLink(res.url);
+    } catch (e) {
+      setErr(e.message || "שגיאה ביצירת לינק תשלום");
+    } finally {
+      setPayBusy(false);
     }
   };
 
@@ -387,25 +428,52 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
                   fontWeight: 700,
                 }}
               >
-                ✓ הצעה #{savedQuote.id} נשמרה
+                {waSent ? "✅ נשלח ללקוח בוואטסאפ" : `✓ הצעה #${savedQuote.id} נשמרה`}
               </div>
               <button onClick={showContract} style={primaryBtn}>
                 📄 פתח חוזה
               </button>
               <button
-                disabled
-                style={{ ...secondaryBtn, opacity: 0.5 }}
-                title="יתווסף בשלב 3 — Green API"
+                onClick={sendWhatsApp}
+                disabled={waSending || waSent || !lead.meta?.phone}
+                title={!lead.meta?.phone ? "חסר מספר טלפון בליד" : waSent ? "נשלח!" : "שלח לוואטסאפ"}
+                style={{
+                  ...secondaryBtn,
+                  opacity: waSending || waSent || !lead.meta?.phone ? 0.5 : 1,
+                  cursor: waSending || waSent || !lead.meta?.phone ? "not-allowed" : "pointer",
+                  background: waSent ? "rgba(16,185,129,0.1)" : secondaryBtn.background,
+                  color: waSent ? COLORS.emerald : secondaryBtn.color,
+                }}
               >
-                📱 שלח לוואטסאפ
+                {waSending ? "שולח..." : waSent ? "✅ נשלח" : "📱 שלח לוואטסאפ"}
               </button>
-              <button
-                disabled
-                style={{ ...secondaryBtn, opacity: 0.5 }}
-                title="יתווסף בשלב 4 — iCount"
-              >
-                💳 צור קישור תשלום
-              </button>
+              {!paymentLink ? (
+                <button
+                  onClick={generatePaymentLink}
+                  disabled={payBusy}
+                  style={{
+                    ...secondaryBtn,
+                    opacity: payBusy ? 0.5 : 1,
+                    cursor: payBusy ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {payBusy ? "יוצר..." : "💳 צור לינק תשלום"}
+                </button>
+              ) : (
+                <a
+                  href={paymentLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    ...secondaryBtn,
+                    textDecoration: "none",
+                    color: COLORS.cyan,
+                    border: `1px solid ${COLORS.cyan}40`,
+                  }}
+                >
+                  💳 לינק תשלום ↗
+                </a>
+              )}
               <button onClick={onClose} style={ghostBtn}>
                 סגור
               </button>

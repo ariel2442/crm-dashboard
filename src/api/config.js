@@ -1,7 +1,8 @@
 /**
- * API configuration — WordPress REST endpoints.
+ * API configuration — PHP backend.
+ * Change BACKEND_URL to wherever you upload the /backend folder on your server.
  */
-export const API_BASE = "https://crm.ariel-azulay.co.il";
-export const WP_API = `${API_BASE}/wp-json/wp/v2`;
-export const JWT_API = `${API_BASE}/wp-json/jwt-auth/v1`;
-export const TOKEN_KEY = "crm_jwt_token";
+export const BACKEND_URL = "https://crm.ariel-azulay.co.il/backend";
+export const API_URL     = `${BACKEND_URL}/api.php`;
+export const TRACK_URL   = `${BACKEND_URL}/track.php`;
+export const TOKEN_KEY   = "crm_token";
