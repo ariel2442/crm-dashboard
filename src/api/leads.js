@@ -26,6 +26,14 @@ export async function saveLead(lead) {
   return data.lead;
 }
 
+export async function createLead({ title, meta = {}, content = "" }) {
+  return saveLead({ title, content, ...meta });
+}
+
+export async function updateLead(id, { title, meta, content }) {
+  return saveLead({ id, title, content, ...meta });
+}
+
 export async function updateLeadStatus(id, status) {
   return saveLead({ id, status });
 }
