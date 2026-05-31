@@ -173,6 +173,8 @@ export function renderContractHtml({
   quoteNumber = "",
   notes = "",
   businessName = "WebCRM",
+  signedBy = null,
+  signatureImage = null,
 }) {
   const scopeFn = BODY_BY_SERVICE[serviceType] || BODY_BY_SERVICE["אחר"];
   const body = scopeFn();
@@ -217,13 +219,22 @@ export function renderContractHtml({
       <li>ההצעה תקפה ל-14 יום ממועד ההצעה.</li>
     </ul>
 
+    ${signedBy ? `
+    <div style="margin-top:30px;padding:16px 20px;background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;">
+      <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:10px;">✅ הסכם חתום</div>
+      <div style="font-size:13px;color:#166534;">חתם: <strong>${escapeHtml(signedBy.name || clientName)}</strong></div>
+      <div style="font-size:13px;color:#166534;">תאריך חתימה: <strong>${escapeHtml(signedBy.date || formatDate())}</strong></div>
+      ${signedBy.method ? `<div style="font-size:13px;color:#166534;">אמצעי תשלום: <strong>${escapeHtml(signedBy.method)}</strong></div>` : ""}
+      ${signatureImage ? `<div style="margin-top:12px;"><img src="${signatureImage}" style="max-width:260px;border:1px solid #86efac;border-radius:6px;background:#fff;padding:6px;" /></div>` : ""}
+    </div>` : `
     <div class="signatures">
       <div class="box">חתימת הלקוח + תאריך</div>
       <div class="box">חתימת ספק השירות + תאריך</div>
-    </div>
+    </div>`}
 
     <footer>
       נוצר באמצעות WebCRM · ${formatDate()}
+      ${signedBy ? ` · נחתם ב-${escapeHtml(signedBy.date || formatDate())}` : ""}
     </footer>
   </div>
 </body>

@@ -9,10 +9,11 @@ import {
   computeTotals,
   DEFAULT_VAT_RATE,
 } from "../../api/quotes.js";
-import { openContractWindow } from "../../contracts/templates.js";
+import { openContractWindow, renderContractHtml } from "../../contracts/templates.js";
 import {
   sendQuoteToClient,
   createPaymentLink,
+  uploadContractToDrive,
 } from "../../api/automations.js";
 import { listProducts } from "../../api/products.js";
 
@@ -38,6 +39,8 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
   const [paymentLink, setPaymentLink] = useState("");
   const [products, setProducts] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
+  const [driveBusy, setDriveBusy] = useState(false);
+  const [driveUrl, setDriveUrl] = useState("");
 
   useEffect(() => {
     listProducts().then(setProducts).catch(() => {});
@@ -140,6 +143,28 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
       quoteNumber: savedQuote ? `#${savedQuote.id}` : "טיוטה",
       notes,
     });
+  };
+
+  const saveToDrive = async () => {
+    if (!savedQuote) return;
+    setDriveBusy(true);
+    setErr("");
+    try {
+      const html = renderContractHtml({
+        clientName: lead.title,
+        serviceType: lead.meta.service_type || "אחר",
+        items,
+        totals: { ...totals, vatRate },
+        quoteNumber: `#${savedQuote.id}`,
+        notes,
+      });
+      const res = await uploadContractToDrive(savedQuote.id, html);
+      setDriveUrl(res?.url || "ok");
+    } catch (e) {
+      setErr(e.message || "שגיאה בהעלאה לדרייב");
+    } finally {
+      setDriveBusy(false);
+    }
   };
 
   return (
@@ -570,6 +595,37 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
                   }}
                 >
                   💳 לינק תשלום ↗
+                </a>
+              )}
+              {!driveUrl ? (
+                <button
+                  onClick={saveToDrive}
+                  disabled={driveBusy}
+                  title="העלה עותק של ההצעה לגוגל דרייב"
+                  style={{
+                    ...secondaryBtn,
+                    opacity: driveBusy ? 0.5 : 1,
+                    cursor: driveBusy ? "not-allowed" : "pointer",
+                    borderColor: "#4ade8040",
+                    color: "#4ade80",
+                  }}
+                >
+                  {driveBusy ? "מעלה..." : "☁️ שמור לדרייב"}
+                </button>
+              ) : (
+                <a
+                  href={driveUrl !== "ok" ? driveUrl : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    ...secondaryBtn,
+                    textDecoration: "none",
+                    color: "#4ade80",
+                    border: "1px solid #4ade8040",
+                    cursor: driveUrl !== "ok" ? "pointer" : "default",
+                  }}
+                >
+                  ✅ נשמר בדרייב{driveUrl !== "ok" ? " ↗" : ""}
                 </a>
               )}
               <button onClick={onClose} style={ghostBtn}>

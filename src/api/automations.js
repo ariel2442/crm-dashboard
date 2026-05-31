@@ -29,12 +29,17 @@ export async function trackQuoteView(id, durationSeconds = 0) {
   }).then((r) => r.json());
 }
 
-export async function signQuote(id, { signerName, paymentMethod, signature }) {
+export async function signQuote(id, { signerName, paymentMethod, signature, contractHtml }) {
   return fetch(TRACK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, action: "sign", signerName, paymentMethod, signature }),
+    body: JSON.stringify({ id, action: "sign", signerName, paymentMethod, signature, contractHtml }),
   }).then((r) => r.json());
+}
+
+export async function uploadContractToDrive(quoteId, htmlContent) {
+  const data = await api.post("contract-drive-upload", { quoteId, htmlContent });
+  return data;
 }
 
 // ── GROW payments ─────────────────────────────────────────────
