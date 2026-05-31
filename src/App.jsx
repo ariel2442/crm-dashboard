@@ -15,6 +15,9 @@ import OrganicLeads from "./components/dashboards/OrganicLeads.jsx";
 import FinanceDetails from "./components/dashboards/FinanceDetails.jsx";
 import ClientProjects from "./components/dashboards/ClientProjects.jsx";
 import LeadsReal from "./components/dashboards/LeadsReal.jsx";
+import ProductsManager from "./components/admin/ProductsManager.jsx";
+import SettingsAutomations from "./components/admin/SettingsAutomations.jsx";
+import UsersManager from "./components/admin/UsersManager.jsx";
 import { COLORS } from "./constants/colors.js";
 
 export default function App() {
@@ -39,6 +42,9 @@ export default function App() {
     if (page === "finance-details") return <FinanceDetails />;
     if (page === "client-projects") return <ClientProjects />;
     if (page === "leads-real") return <LeadsReal />;
+    if (page === "products") return <ProductsManager />;
+    if (page === "auto") return <SettingsAutomations />;
+    if (page === "users") return <UsersManager />;
     return <Placeholder page={page} />;
   };
 

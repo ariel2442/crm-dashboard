@@ -104,6 +104,13 @@ export const NAV_GROUPS = [
     label: "הגדרות",
     items: [
       {
+        id: "products",
+        icon: "📦",
+        label: "מוצרים ושירותים",
+        badge: null,
+        colorKey: "violet",
+      },
+      {
         id: "auto",
         icon: "⚡",
         label: "אוטומציות",
@@ -194,6 +201,12 @@ export const PAGE_META = {
     sub: "רשימה מפורטת של כל התעסוקות",
     icon: "📊",
     colorKey: "rose",
+  },
+  products: {
+    title: "מוצרים ושירותים",
+    sub: "ניהול קטלוג מוצרים · מחירים · תנאי הסכם",
+    icon: "📦",
+    colorKey: "violet",
   },
   auto: {
     title: "אוטומציות",

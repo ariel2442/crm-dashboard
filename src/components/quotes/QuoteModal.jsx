@@ -2,7 +2,7 @@
  * QuoteModal — builds a quote, saves to WP, sends via WhatsApp (Green API),
  * creates GROW payment links, and shows tracking info.
  */
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { COLORS } from "../../constants/colors.js";
 import {
   createQuote,
@@ -14,6 +14,7 @@ import {
   sendQuoteToClient,
   createPaymentLink,
 } from "../../api/automations.js";
+import { listProducts } from "../../api/products.js";
 
 const formatMoney = (n) =>
   new Intl.NumberFormat("he-IL", {
@@ -35,6 +36,12 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
   const [waSent, setWaSent] = useState(false);
   const [payBusy, setPayBusy] = useState(false);
   const [paymentLink, setPaymentLink] = useState("");
+  const [products, setProducts] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
+
+  useEffect(() => {
+    listProducts().then(setProducts).catch(() => {});
+  }, []);
 
   const totals = useMemo(
     () => computeTotals(items, vatRate),
@@ -48,6 +55,14 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
   };
 
   const addRow = () => setItems((prev) => [...prev, emptyRow()]);
+
+  const addProductRow = (product) => {
+    setItems((prev) => [
+      ...prev.filter((it) => it.description.trim() || Number(it.price) > 0),
+      { description: product.name, quantity: 1, price: product.price },
+    ]);
+    setShowPicker(false);
+  };
 
   const removeRow = (idx) => {
     setItems((prev) =>
@@ -193,6 +208,89 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
             </button>
           </div>
         </div>
+
+        {/* Product picker */}
+        {products.length > 0 && !savedQuote && (
+          <div style={{ marginBottom: 10, position: "relative" }}>
+            <button
+              onClick={() => setShowPicker((v) => !v)}
+              style={{
+                padding: "8px 14px",
+                borderRadius: 8,
+                background: `${COLORS.violet}12`,
+                color: COLORS.violet,
+                fontSize: 12,
+                fontWeight: 700,
+                border: `1px dashed ${COLORS.violet}50`,
+                cursor: "pointer",
+              }}
+            >
+              📦 {showPicker ? "סגור בחירת מוצר" : "בחר מוצר מהקטלוג"}
+            </button>
+            {showPicker && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "calc(100% + 6px)",
+                  right: 0,
+                  background: COLORS.card,
+                  border: `1px solid ${COLORS.border}`,
+                  borderRadius: 12,
+                  boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+                  zIndex: 20,
+                  minWidth: 300,
+                  maxWidth: 420,
+                  maxHeight: 260,
+                  overflowY: "auto",
+                  padding: 8,
+                }}
+              >
+                {products.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => addProductRow(p)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      textAlign: "right",
+                      gap: 12,
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = `${COLORS.cyan}10`)}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <div style={{ flex: 1, textAlign: "right" }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.text }}>
+                        {p.name}
+                      </div>
+                      {p.description && (
+                        <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 2 }}>
+                          {p.description}
+                        </div>
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: COLORS.cyan,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(p.price)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Items table */}
         <div

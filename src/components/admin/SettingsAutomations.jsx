@@ -210,6 +210,7 @@ export default function SettingsAutomations() {
   if (!settings) return null;
 
   return (
+    <div style={{ overflowY: "auto", height: "100%", padding: "0 24px" }}>
     <div
       style={{
         maxWidth: 760,
@@ -273,9 +274,6 @@ export default function SettingsAutomations() {
           </Field>
           <Field label="טלפון עסק">
             <input style={inputStyle} value={settings.bizPhone || ""} onChange={(e) => set("bizPhone", e.target.value)} placeholder="050-0000000" />
-          </Field>
-          <Field label="פרטי בנק" hint="לתשלום בהעברה">
-            <input style={inputStyle} value={settings.bizBank || ""} onChange={(e) => set("bizBank", e.target.value)} placeholder="בנק לאומי | סניף 123 | חשבון 456789" />
           </Field>
         </div>
         <Field label="URL בסיס האתר" hint="לקישורים בהצעות מחיר">
@@ -451,15 +449,14 @@ export default function SettingsAutomations() {
       {/* ── תבניות הודעות ─────────────────────────────────── */}
       <Section title="✍️ תבניות הודעות WhatsApp">
         <p style={{ fontSize: 11, color: COLORS.textMuted, marginBottom: 14 }}>
-          משתנים: <code>{"{name}"}</code> שם לקוח · <code>{"{num}"}</code> מספר הצעה · <code>{"{link}"}</code> קישור · <code>{"{total}"}</code> סכום · <code>{"{payLink}"}</code> קישור תשלום · <code>{"{bank}"}</code> פרטי בנק · <code>{"{hours}"}</code> שעות
+          משתנים: <code>{"{name}"}</code> שם לקוח · <code>{"{num}"}</code> מספר הצעה · <code>{"{link}"}</code> קישור · <code>{"{total}"}</code> סכום · <code>{"{payLink}"}</code> קישור תשלום · <code>{"{hours}"}</code> שעות
         </p>
         {[
           ["msgSendClient",        "📤 שליחה ללקוח"],
           ["msgViewFirst",         "👁 צפייה ראשונה (לנציג)"],
           ["msgViewReturn",        "🔄 חזרה לצפות (לנציג)"],
           ["msgSignRep",           "✅ חתימה (לנציג)"],
-          ["msgSignCredit",        "💳 חתימה + אשראי (ללקוח)"],
-          ["msgSignBank",          "🏦 חתימה + בנק (ללקוח)"],
+          ["msgSignCredit",        "💳 חתימה + תשלום (ללקוח)"],
           ["msgReminderNotOpen",   "⏰ תזכורת: לא פתח"],
           ["msgReminderNotSigned", "⏰ תזכורת: לא חתם"],
         ].map(([key, label]) => (
@@ -482,6 +479,7 @@ export default function SettingsAutomations() {
           {saving ? "שומר..." : "💾 שמור הכל"}
         </button>
       </div>
+    </div>
     </div>
   );
 }
