@@ -105,7 +105,7 @@ export default function QuoteModal({ lead, onClose, onSaved }) {
     setWaSending(true);
     setErr("");
     try {
-      await sendQuoteToClient(savedQuote.id, lead.meta.phone || "");
+      await sendQuoteToClient({ id: savedQuote.id, phone: lead.meta.phone || "" });
       setWaSent(true);
     } catch (e) {
       setErr(e.message || "שגיאה בשליחת WhatsApp");

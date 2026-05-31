@@ -173,6 +173,23 @@ if ($action === 'grow-test') {
     fail('פרטי GROW לא תקינים' . ($errMsg ? ': ' . $errMsg : ''));
 }
 
+if ($action === 'contract-drive-upload') {
+    requireAuth();
+    $quoteId     = $body['quoteId'] ?? '';
+    $htmlContent = $body['htmlContent'] ?? '';
+    if (!$quoteId || !$htmlContent) fail('חסרים quoteId / htmlContent');
+    $s = getSettings();
+    if (empty($s['driveServiceAccount']) || empty($s['driveFolderId'])) fail('Google Drive לא מוגדר בהגדרות');
+    $q = findById('quotes', $quoteId);
+    $propNum  = $q['proposalNum'] ?? $quoteId;
+    $client   = $q['clientName']  ?? 'לקוח';
+    $filename = "הצעה_{$propNum}_{$client}_" . date('Y-m-d') . '.html';
+    $url = uploadToDrive($filename, $htmlContent, 'text/html');
+    if (!$url) fail('שגיאה בהעלאה ל-Google Drive');
+    if ($q) { $q['driveUrl'] = $url; upsert('quotes', $q); }
+    ok(['url' => $url]);
+}
+
 /* ════════════════════════════════════════════════════════════════
  * PROJECTS
  * ════════════════════════════════════════════════════════════════ */

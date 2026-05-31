@@ -75,32 +75,26 @@ if ($action === 'sign') {
     $clientName  = $q['clientName']  ?? 'לקוח';
     $total       = number_format((float)($q['total'] ?? 0), 0, '.', ',');
     $repPhone    = $q['salesRepPhone'] ?? ($s['salesRepPhone'] ?? '');
-    $bank        = $q['bizBank'] ?? ($s['bizBank'] ?? '');
     $propNum     = $q['proposalNum'] ?? $q['id'];
 
-    // WhatsApp to client
+    // WhatsApp to client — always credit card flow
     if ($clientPhone && !empty($s['autoClientPayment'])) {
-        $vars = ['name' => $clientName, 'num' => $propNum, 'total' => $total];
-        if ($paymentMethod === 'credit') {
-            $payLink = $q['paymentLink'] ?? createPaymentLink(array_merge($q, ['proposalNum' => $propNum]));
-            if ($payLink) {
-                $q['paymentLink'] = $payLink;
-                upsert('quotes', $q);
-                $tpl = $s['msgSignCredit'] ?? "שלום {name} 👋\n\nתודה על חתימתך!\nלתשלום:\n🔗 {payLink}\n\nסכום: ₪{total}";
-                sendWhatsapp($clientPhone, tpl($tpl, $vars + ['payLink' => $payLink]));
-            } else {
-                sendWhatsapp($clientPhone, tpl($s['msgSignNoLink'] ?? "שלום {name} 👋\n\nתודה על חתימתך! ✍️\nלינק תשלום יישלח בקרוב.", $vars));
-            }
+        $vars    = ['name' => $clientName, 'num' => $propNum, 'total' => $total];
+        $payLink = $q['paymentLink'] ?? createPaymentLink(array_merge($q, ['proposalNum' => $propNum]));
+        if ($payLink) {
+            $q['paymentLink'] = $payLink;
+            upsert('quotes', $q);
+            $tpl = $s['msgSignCredit'] ?? "שלום {name} 👋\n\nתודה על חתימתך!\nלתשלום:\n🔗 {payLink}\n\nסכום: ₪{total}";
+            sendWhatsapp($clientPhone, tpl($tpl, $vars + ['payLink' => $payLink]));
         } else {
-            sendWhatsapp($clientPhone, tpl($s['msgSignBank'] ?? "שלום {name} 👋\n\nתודה על חתימתך! ✍️\nלהעברה בנקאית:\n{bank}\n\nסכום: ₪{total}", $vars + ['bank' => $bank]));
+            sendWhatsapp($clientPhone, tpl($s['msgSignNoLink'] ?? "שלום {name} 👋\n\nתודה על חתימתך! ✍️\nלינק תשלום יישלח בקרוב.", $vars));
         }
     }
 
     // WhatsApp to rep
     if ($repPhone && !empty($s['autoRepSign'])) {
-        $payLabel = $paymentMethod === 'credit' ? 'אשראי 💳' : 'העברה בנקאית 🏦';
-        $tpl      = $s['msgSignRep'] ?? "✅ {name} חתמ/ה!\n📄 הצעה #{num}\n💰 ₪{total}\n💳 {payMethod}\n✍️ {signerName}";
-        sendWhatsapp($repPhone, tpl($tpl, ['name' => $clientName, 'num' => $propNum, 'total' => $total, 'payMethod' => $payLabel, 'signerName' => $signerName]));
+        $tpl = $s['msgSignRep'] ?? "✅ {name} חתמ/ה!\n📄 הצעה #{num}\n💰 ₪{total}\n💳 אשראי\n✍️ {signerName}";
+        sendWhatsapp($repPhone, tpl($tpl, ['name' => $clientName, 'num' => $propNum, 'total' => $total, 'signerName' => $signerName]));
     }
 
     // Google Drive
@@ -108,7 +102,7 @@ if ($action === 'sign') {
         $text = implode("\n", [
             "הסכם חתום — הצעה #{$propNum}", str_repeat('─', 36),
             "לקוח: {$clientName}", "טלפון: {$clientPhone}", "סכום: ₪{$total}",
-            "תשלום: " . ($paymentMethod === 'credit' ? 'אשראי' : 'העברה בנקאית'),
+            "תשלום: אשראי",
             "חתם/ה: {$signerName}", "תאריך: " . date('d/m/Y H:i'), "", "ID: {$id}",
         ]);
         uploadToDrive("הצעה_{$propNum}_{$clientName}_" . date('Y-m-d') . '.txt', $text);
@@ -118,7 +112,7 @@ if ($action === 'sign') {
     $adminEmail = $s['bizEmail'] ?? '';
     if ($adminEmail) {
         $subject = '=?UTF-8?B?' . base64_encode("הצעה נחתמה — {$clientName}") . '?=';
-        $msg2    = "לקוח חתם!\n\nלקוח: {$clientName}\nסכום: ₪{$total}\nתשלום: " . ($paymentMethod === 'credit' ? 'אשראי' : 'בנק') . "\nחתם/ה: {$signerName}\nתאריך: " . date('d/m/Y H:i');
+        $msg2    = "לקוח חתם!\n\nלקוח: {$clientName}\nסכום: ₪{$total}\nתשלום: אשראי\nחתם/ה: {$signerName}\nתאריך: " . date('d/m/Y H:i');
         @mail($adminEmail, $subject, $msg2, "From: CRM <noreply@" . parse_url($s['baseUrl'] ?? 'http://localhost', PHP_URL_HOST) . ">\r\nContent-Type: text/plain; charset=UTF-8");
     }
 

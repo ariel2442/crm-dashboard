@@ -7,7 +7,6 @@ const emptyProduct = () => ({
   name: "",
   description: "",
   price: 0,
-  contractText: "",
   active: true,
 });
 
@@ -24,13 +23,6 @@ const inputStyle = {
   boxSizing: "border-box",
 };
 
-const textareaStyle = {
-  ...inputStyle,
-  minHeight: 100,
-  resize: "vertical",
-  fontFamily: "inherit",
-  lineHeight: 1.6,
-};
 
 const primaryBtn = {
   padding: "9px 18px",
@@ -148,19 +140,6 @@ function ProductForm({ product, onSave, onCancel, saving }) {
           value={form.description}
           onChange={(e) => set("description", e.target.value)}
           placeholder="תיאור קצר שיופיע בבחירת מוצר בהצעת מחיר"
-        />
-      </div>
-
-      <div style={{ marginBottom: 18 }}>
-        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: COLORS.textMuted, marginBottom: 5 }}>
-          תנאי הסכם / חוזה
-          <span style={{ fontWeight: 400, marginRight: 6, opacity: 0.7 }}>— יופיע בחוזה שנוצר להצעה</span>
-        </label>
-        <textarea
-          style={textareaStyle}
-          value={form.contractText}
-          onChange={(e) => set("contractText", e.target.value)}
-          placeholder={"מהות העבודה:\n• פריט ראשון\n• פריט שני\n\nלוח זמנים:\nאספקה עד 21 ימי עבודה ממועד התשלום הראשון."}
         />
       </div>
 
@@ -359,24 +338,6 @@ export default function ProductsManager() {
                 {p.description && (
                   <p style={{ fontSize: 12, color: COLORS.textMuted, margin: 0 }}>
                     {p.description}
-                  </p>
-                )}
-                {p.contractText && (
-                  <p
-                    style={{
-                      fontSize: 11,
-                      color: COLORS.textMuted,
-                      margin: "6px 0 0",
-                      padding: "6px 10px",
-                      background: "rgba(255,255,255,0.02)",
-                      borderRadius: 6,
-                      border: `1px solid ${COLORS.border}`,
-                      whiteSpace: "pre-wrap",
-                      maxHeight: 60,
-                      overflow: "hidden",
-                    }}
-                  >
-                    📄 {p.contractText.slice(0, 120)}{p.contractText.length > 120 ? "..." : ""}
                   </p>
                 )}
               </div>

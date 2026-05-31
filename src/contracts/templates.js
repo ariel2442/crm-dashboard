@@ -100,74 +100,13 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-/* ------------------------------------------------------------------
- * Per-service-type body clauses.
- * Each returns the middle "scope of work" block.
- * ------------------------------------------------------------------ */
-const BODY_BY_SERVICE = {
-  "אתר עסקי": () => `
-    <h2>מהות העבודה</h2>
-    <p>הקמת אתר עסקי על בסיס וורדפרס, כולל:</p>
-    <ul>
-      <li>עיצוב מותאם לזהות המותג (דסקטופ + מובייל)</li>
-      <li>עד 6 עמודי תוכן סטטיים</li>
-      <li>טופס יצירת קשר + חיבור למערכת לידים</li>
-      <li>אופטימיזציית SEO בסיסית ו-Core Web Vitals</li>
-      <li>התקנה על שרת הלקוח, תעודת SSL והדרכה 30 דקות</li>
-    </ul>
-    <h2>לוח זמנים</h2>
-    <p>אספקה משוערת: עד 21 ימי עבודה ממועד קבלת התשלום הראשון ותכני הלקוח.</p>
-  `,
-  "חנות אונליין": () => `
-    <h2>מהות העבודה</h2>
-    <p>הקמת חנות אונליין מלאה על WooCommerce, כולל:</p>
-    <ul>
-      <li>עיצוב חנות מותאם לזהות המותג</li>
-      <li>הטענת עד 30 מוצרים ראשונים (תמונה, תיאור, מלאי)</li>
-      <li>חיבור סליקה בישראל (Cardcom / Meshulam / iCount)</li>
-      <li>חיבור ספק משלוחים ומייל תזכורות אוטומטי</li>
-      <li>הדרכה על ניהול החנות (שעה מלאה)</li>
-    </ul>
-    <h2>לוח זמנים</h2>
-    <p>אספקה משוערת: עד 30 ימי עבודה ממועד התשלום הראשון.</p>
-  `,
-  "מערכת CRM": () => `
-    <h2>מהות העבודה</h2>
-    <p>בניית מערכת CRM מותאמת אישית, כולל:</p>
-    <ul>
-      <li>ניהול לידים, סטטוסים ואוטומציות מותאמות</li>
-      <li>דשבורד נתונים + דוחות ביצועים</li>
-      <li>הרשאות לפי תפקידים (מנהל / נציג / לקוח)</li>
-      <li>אינטגרציה לשרת הלקוח ולכלים חיצוניים (WhatsApp, Email, סליקה)</li>
-      <li>הדרכת צוות והטמעה (שעתיים)</li>
-    </ul>
-    <h2>לוח זמנים</h2>
-    <p>אספקה משוערת: 30-45 ימי עבודה בכפוף לאפיון מפורט.</p>
-  `,
-  "ייעוץ": () => `
-    <h2>מהות העבודה</h2>
-    <p>שירותי ייעוץ מקצועיים, כולל:</p>
-    <ul>
-      <li>פגישת אפיון ראשונית וניתוח מצב קיים</li>
-      <li>מסמך המלצות מפורט ותוכנית פעולה</li>
-      <li>ליווי צמוד עד השלמת היישום</li>
-      <li>זמינות לשאלות במייל / וואטסאפ במהלך תקופת הליווי</li>
-    </ul>
-    <h2>לוח זמנים</h2>
-    <p>משך הליווי המוסכם: יתואם פרטנית מול הלקוח.</p>
-  `,
-  "אחר": () => `
-    <h2>מהות העבודה</h2>
-    <p>ראה פירוט הפריטים בהצעה. היקף העבודה יוגדר באישור הצדדים לפני תחילת הביצוע.</p>
-  `,
-};
 
 /* ------------------------------------------------------------------
  * Main render function.
  * ------------------------------------------------------------------ */
 export function renderContractHtml({
   clientName = "",
-  serviceType = "אחר",
+  serviceType = "",
   items = [],
   totals = { subtotal: 0, vatAmount: 0, total: 0, vatRate: 18 },
   quoteNumber = "",
@@ -176,9 +115,6 @@ export function renderContractHtml({
   signedBy = null,
   signatureImage = null,
 }) {
-  const scopeFn = BODY_BY_SERVICE[serviceType] || BODY_BY_SERVICE["אחר"];
-  const body = scopeFn();
-
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -191,7 +127,7 @@ export function renderContractHtml({
   <button class="print-btn no-print" onclick="window.print()">🖨 הדפס / שמור כ-PDF</button>
   <div class="sheet">
     <header>
-      <h1>הצעת מחיר — ${escapeHtml(serviceType)}</h1>
+      <h1>הצעת מחיר${serviceType ? ` — ${escapeHtml(serviceType)}` : ""}</h1>
       <div class="meta">
         ${quoteNumber ? `מספר הצעה: ${escapeHtml(quoteNumber)} · ` : ""}
         תאריך: ${formatDate()} · ${escapeHtml(businessName)}
@@ -199,8 +135,6 @@ export function renderContractHtml({
     </header>
 
     <p><strong>לכבוד:</strong> ${escapeHtml(clientName || "—")}</p>
-
-    ${body}
 
     <h2>פירוט הצעה</h2>
     ${itemsTable(items)}
@@ -212,14 +146,8 @@ export function renderContractHtml({
         : ""
     }
 
-    <h2>תנאי תשלום</h2>
-    <ul>
-      <li>50% מקדמה עם חתימת ההסכם, 50% יתרה עם אישור סופי להעלאה לאוויר/סיום העבודה.</li>
-      <li>המחירים אינם כוללים עלויות צד ג׳ (שרת, דומיין, תוספי פרמיום) אלא אם צוין אחרת.</li>
-      <li>ההצעה תקפה ל-14 יום ממועד ההצעה.</li>
-    </ul>
 
-    ${signedBy ? `
+${signedBy ? `
     <div style="margin-top:30px;padding:16px 20px;background:#f0fdf4;border:2px solid #16a34a;border-radius:10px;">
       <div style="font-size:14px;font-weight:800;color:#15803d;margin-bottom:10px;">✅ הסכם חתום</div>
       <div style="font-size:13px;color:#166534;">חתם: <strong>${escapeHtml(signedBy.name || clientName)}</strong></div>
